@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
+import pacApp.RentalSender;
 import pacApp.pacData.RentalRepository;
 import pacApp.pacData.UserRepository;
 import pacApp.pacException.AuthenticationForbiddenException;
@@ -33,13 +34,13 @@ public class RentalController extends BaseRestController {
 
     private final RentalRepository repository;
     private final UserRepository userRepository;
-    private final CarRepository carRepository;
+    //private final CarRepository carRepository;
     private static final Logger log = LoggerFactory.getLogger(RentalController.class);
 
-    public RentalController(RentalRepository repository, UserRepository userRepository, CarRepository carRepository){
+    public RentalController(RentalRepository repository, UserRepository userRepository){
         this.repository = repository;
         this.userRepository = userRepository;
-        this.carRepository = carRepository;
+        //this.carRepository = carRepository;
     }
 
     @GetMapping("/rental")
@@ -134,6 +135,9 @@ public class RentalController extends BaseRestController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
+        /*
+        //safety check for valid car id
+
         Optional<Car> optionalCar = this.carRepository.findById(carId);
 
         if (!optionalCar.isPresent()) {
@@ -152,6 +156,7 @@ public class RentalController extends BaseRestController {
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         }
+        */
 
         long unixTimestamp = Instant.now().getEpochSecond();
 
@@ -168,7 +173,8 @@ public class RentalController extends BaseRestController {
         Rental rental = new Rental();
         rental.setStartDate(startDate);
         rental.setUser(user);
-        rental.setCar(car);
+        //rental.setCar(car);
+        rental.setCarId(carId);
 
         Rental savedRental = this.repository.save(rental);
 
@@ -176,6 +182,10 @@ public class RentalController extends BaseRestController {
             GenericResponse response = new GenericResponse(500,"Car already booked");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        //publish message in MessageBroker
+        RentalSender rentalSender = new RentalSender();
+        rentalSender.send(savedRental);
 
         //GenericResponse response = new GenericResponse(200, "Booking successful");
         Booking bookingResponse = this.convertRentalToBooking(savedRental);
@@ -246,6 +256,7 @@ public class RentalController extends BaseRestController {
 
         rental = this.repository.save(rental);
 
+        /*
         //update car location
 
         List<Car> exceptionCarList = this.carRepository.findAll();
@@ -258,6 +269,7 @@ public class RentalController extends BaseRestController {
         rentalCar.setLongitude(newCar.getLongitude());
 
         this.carRepository.save(rentalCar);
+        */
 
         //return new ResponseEntity<>(rental, HttpStatus.OK);
         Booking bookingResponse = this.convertRentalToBooking(rental);
@@ -289,8 +301,9 @@ public class RentalController extends BaseRestController {
         //TODO: implement user roles
 
         long userId = user.getId();
+        String email = user.getEmail();
 
-        if (userId != 1L) {
+        if (userId != 1L && !email.equals("admin@carrental.com")) {
             GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
@@ -311,7 +324,8 @@ public class RentalController extends BaseRestController {
     protected Booking convertRentalToBooking(Rental rental) {
         Booking booking = new Booking();
         booking.setId(rental.getId());
-        booking.setCarId(rental.getCar().getId());
+        //booking.setCarId(rental.getCar().getId());
+        booking.setCarId(rental.getCarId());
 
         if (rental.getStartDate() != null) {
             Timestamp startDate = rental.getStartDate();

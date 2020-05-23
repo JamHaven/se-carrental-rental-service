@@ -8,7 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pacApp.pacSoapConnector.SoapConvertCurrencyConnector;
 
-
 @EnableDiscoveryClient
 @SpringBootApplication
 public class WebServerMachine {
