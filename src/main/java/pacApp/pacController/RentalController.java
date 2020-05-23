@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
 import pacApp.pacData.RentalRepository;
+import pacApp.pacData.UserRepository;
 import pacApp.pacException.AuthenticationForbiddenException;
 import pacApp.pacLogic.Constants;
 import pacApp.pacModel.Car;
