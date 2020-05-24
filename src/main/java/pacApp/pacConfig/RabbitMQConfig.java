@@ -21,12 +21,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public CarReceiver receiver() {
+    public CarReceiver carReceiver() {
         return new CarReceiver();
     }
 
     @Bean
-    public RentalSender sender() {
+    public RentalSender rentalSender() {
         return new RentalSender();
     }
 
@@ -37,6 +37,6 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding carBinding(TopicExchange topic, Queue autoDeleteCarQueue){
-        return BindingBuilder.bind(autoDeleteCarQueue).to(topic).with("*.car*.");
+        return BindingBuilder.bind(autoDeleteCarQueue).to(topic).with("rental");
     }
 }

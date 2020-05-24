@@ -16,6 +16,6 @@ public class CarReceiver {
 
     @RabbitListener(queues = "#{autoDeleteCarQueue.name}")
     public void receive(String input) throws InterruptedException {
-        log.info("CarReceiver.receive: " + input);
+        log.info("receive: " + input);
     }
 }
