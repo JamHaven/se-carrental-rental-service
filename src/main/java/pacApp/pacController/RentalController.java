@@ -256,6 +256,10 @@ public class RentalController extends BaseRestController {
 
         rental = this.repository.save(rental);
 
+        //publish message in MessageBroker
+        RentalSender rentalSender = new RentalSender();
+        rentalSender.send(rental);
+
         /*
         //update car location
 
@@ -319,6 +323,28 @@ public class RentalController extends BaseRestController {
 
         GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"Rental " + id.toString() + " deleted");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/currencies", method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getCurrencyCodes() {
+        List<String> currencyCodeList = null;
+
+        try {
+            SoapConvertCurrencyConnector currencyConnector = new SoapConvertCurrencyConnector();
+            currencyCodeList = currencyConnector.getCurrencyCodesResponse();
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+
+        if (currencyCodeList == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Currency conversion unavailable");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        currencyCodeList.add("EUR");
+
+        return new ResponseEntity<>(currencyCodeList, HttpStatus.OK);
     }
 
     protected Booking convertRentalToBooking(Rental rental) {
