@@ -2,6 +2,7 @@ package pacApp.pacController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,8 @@ public class RentalController extends BaseRestController {
     private final UserRepository userRepository;
     //private final CarRepository carRepository;
     private static final Logger log = LoggerFactory.getLogger(RentalController.class);
+    @Autowired
+    RentalSender rentalSender;
 
     public RentalController(RentalRepository repository, UserRepository userRepository){
         this.repository = repository;
@@ -183,8 +186,7 @@ public class RentalController extends BaseRestController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        //publish message in MessageBroker
-        RentalSender rentalSender = new RentalSender();
+        //publish message with rental
         rentalSender.send(savedRental);
 
         //GenericResponse response = new GenericResponse(200, "Booking successful");
@@ -256,8 +258,7 @@ public class RentalController extends BaseRestController {
 
         rental = this.repository.save(rental);
 
-        //publish message in MessageBroker
-        RentalSender rentalSender = new RentalSender();
+        //publish message with rental
         rentalSender.send(rental);
 
         /*
