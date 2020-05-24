@@ -31,9 +31,12 @@ public class Rental implements Serializable {
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
+    /*
     @ManyToOne
     @JoinColumn(name = "CarID", nullable = false)
     private Car car;
+    */
+    private long carId;
 
     public Rental(){}
 
@@ -60,7 +63,7 @@ public class Rental implements Serializable {
     public void setEndDate(Timestamp endDate) {
         this.endDate = endDate;
 
-        if (this.startDate == null || this.car == null) {
+        if (this.startDate == null || this.carId == 0) {
             return;
         }
 
@@ -75,8 +78,9 @@ public class Rental implements Serializable {
 
         //adjust price based on car
 
-        Car rentalCar = this.car;
-        double multiplier = rentalCar.getType().getCostMultiplier();
+        //Car rentalCar = this.car;
+        //double multiplier = rentalCar.getType().getCostMultiplier();
+        double multiplier = 0;
 
         price = price + (price * multiplier);
 
@@ -98,13 +102,21 @@ public class Rental implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
-
+    /*
     public Car getCar() {
         return car;
     }
 
     public void setCar(Car car) {
         this.car = car;
+    }*/
+
+    public long getCarId() {
+        return this.carId;
+    }
+
+    public void setCarId(long carId) {
+        this.carId = carId;
     }
 
     @Override
@@ -117,11 +129,12 @@ public class Rental implements Serializable {
                 Objects.equals(endDate, rental.endDate) &&
                 Objects.equals(price, rental.price) &&
                 this.user.equals(rental.user) &&
-                this.car.equals(rental.car);
+                //this.car.equals(rental.car);
+                this.carId == rental.carId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startDate, endDate, price, user, car);
+        return Objects.hash(id, startDate, endDate, price, user, carId);
     }
 }
